@@ -2,7 +2,8 @@ from fastapi import FastAPI
 import yfinance as yf
 import plotly.express as px
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+import json
 
 app = FastAPI()
 
@@ -12,9 +13,10 @@ async def root():
     return "Hello World! We are ODA!"
 
 
-@app.get("/{ticker}")
+@app.get("/{ticker}", response_class=JSONResponse)
 async def get_data(ticker):
-    return yf.download(tickers=ticker, period='max', interval='1d').to_json()
+    data = json.loads(yf.download(tickers=ticker, period='max', interval='1d').to_json())
+    return JSONResponse(content=data)
 
 
 @app.get("/{ticker}/dash/{column}", response_class=HTMLResponse)
